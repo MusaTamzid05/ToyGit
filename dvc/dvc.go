@@ -6,16 +6,18 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"toy_git/file_io"
 )
 
 type DVC struct {
-	dotPath string
-	hashes  []string
+	dotPath     string
+	dotFileName string
+	hashes      []string
 }
 
 func New() *DVC {
 
-	dvc := DVC{}
+	dvc := DVC{dotFileName: "toy_git.txt"}
 	dvc.init()
 	return &dvc
 }
@@ -27,7 +29,7 @@ func (d *DVC) init() {
 		log.Println(err)
 	}
 
-	d.dotPath = currentDir + string(os.PathSeparator) + ".toy_git"
+	d.dotPath = currentDir + string(os.PathSeparator) + d.dotFileName
 }
 
 func (d *DVC) GetCurrentDirHashes() map[string]string {
@@ -61,5 +63,13 @@ func (d *DVC) GetCurrentDirHashes() map[string]string {
 	}
 
 	return hashes
+
+}
+
+func (d *DVC) InitCommand() {
+
+	if !file_io.Exists(d.dotPath) {
+		file_io.CreateFile(d.dotPath)
+	}
 
 }
