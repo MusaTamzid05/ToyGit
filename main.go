@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"toy_git/dvc"
 	"toy_git/file_io"
 )
 
@@ -16,5 +17,10 @@ func main() {
 
 	for i, line := range lines {
 		fmt.Printf("%d => %s\n", i, line)
+	}
+
+	dvc := dvc.New()
+	for _, hash := range dvc.GetCurrentDirHashes() {
+		fmt.Println(hash)
 	}
 }
