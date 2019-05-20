@@ -30,9 +30,9 @@ func (d *DVC) init() {
 	d.dotPath = currentDir + string(os.PathSeparator) + ".toy_git"
 }
 
-func (d *DVC) GetCurrentDirHashes() []string {
+func (d *DVC) GetCurrentDirHashes() map[string]string {
 
-	hashes := []string{}
+	hashes := make(map[string]string)
 
 	err := filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
 
@@ -51,7 +51,7 @@ func (d *DVC) GetCurrentDirHashes() []string {
 		fmt.Fprintf(currentHash, "%v", info.Name())
 		fmt.Fprintf(currentHash, "%v", info.Size())
 
-		hashes = append(hashes, fmt.Sprintf("%x", currentHash.Sum(nil)))
+		hashes[info.Name()] = fmt.Sprintf("%x", currentHash.Sum(nil))
 
 		return nil
 	})
