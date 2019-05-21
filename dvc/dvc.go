@@ -9,6 +9,8 @@ import (
 	"strings"
 	"toy_git/file_io"
 	"toy_git/util"
+
+	"github.com/fatih/color"
 )
 
 type DVC struct {
@@ -142,8 +144,8 @@ func (d *DVC) StatusCommand() {
 	}
 
 	fmt.Println("Listing all the untracked files.")
-	for _, currentFile := range untrackedFiles {
-		fmt.Println(currentFile)
+	for _, untrackedFile := range untrackedFiles {
+		color.Red(untrackedFile)
 	}
 }
 
