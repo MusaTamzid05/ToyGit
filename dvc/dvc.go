@@ -6,7 +6,9 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"toy_git/file_io"
+	"toy_git/util"
 )
 
 type DVC struct {
@@ -72,4 +74,88 @@ func (d *DVC) InitCommand() {
 		file_io.CreateFile(d.dotPath)
 	}
 
+}
+
+func (d *DVC) initCheck() {
+
+	if !file_io.Exists(d.dotPath) {
+		log.Fatalln("Initiaize toy_git first.")
+	}
+
+}
+
+func (d *DVC) getUntrackFiles() []string {
+
+	untrackedFiles := []string{}
+	trackedFiles := d.getTrackedFiles()
+
+	if len(trackedFiles) == 0 {
+		return untrackedFiles
+	}
+
+	currentDirFiles, err := file_io.GetFilesFrom(".")
+
+	if err != nil {
+		log.Fatalln("Error getting files from current dir!!")
+	}
+
+	for _, currentFile := range currentDirFiles {
+		if !util.StringContains(trackedFiles, currentFile) {
+			untrackedFiles = append(untrackedFiles, currentFile)
+		}
+
+	}
+
+	return untrackedFiles
+
+}
+
+func (d *DVC) getDotFileData() map[string]string {
+
+	dotFileData := make(map[string]string)
+	lines, err := file_io.ReadLines(d.dotPath)
+
+	if err != nil {
+		log.Println("Error getting untracked files.")
+		log.Fatalln(err)
+	}
+
+	if len(lines) == 0 {
+		return dotFileData
+	}
+
+	for _, line := range lines {
+		data := strings.Split(line, " ")
+		dotFileData[data[0]] = data[1]
+	}
+
+	return dotFileData
+
+}
+
+func (d *DVC) StatusCommand() {
+	d.initCheck()
+	untrackedFiles := d.getUntrackFiles()
+
+	if len(untrackedFiles) == 0 {
+		fmt.Println("There no untracked files.")
+	}
+
+	fmt.Println("Listing all the untracked files.")
+	for _, currentFile := range untrackedFiles {
+		fmt.Println(currentFile)
+	}
+}
+
+func (d *DVC) getTrackedFiles() []string {
+
+	dotFileData := d.getDotFileData()
+
+	trackedFiles := []string{}
+
+	for trackedFile := range dotFileData {
+		trackedFiles = append(trackedFiles, trackedFile)
+	}
+
+	return trackedFiles
 }

@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"path/filepath"
 )
 
 func ReadLines(path string) ([]string, error) {
@@ -30,7 +31,6 @@ func ReadLines(path string) ([]string, error) {
 
 func Exists(path string) bool {
 
-	fmt.Println(path)
 	if _, err := os.Stat(path); err == nil {
 		return true
 	}
@@ -48,5 +48,32 @@ func CreateFile(path string) error {
 	}
 
 	return nil
+
+}
+
+func GetFilesFrom(path string) ([]string, error) {
+
+	files := []string{}
+
+	err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
+
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() {
+			return nil
+		}
+
+		files = append(files, info.Name())
+
+		return nil
+	})
+
+	if err != nil {
+		return files, err
+	}
+
+	return files, nil
 
 }

@@ -8,4 +8,5 @@ func main() {
 
 	dvc := dvc.New()
 	dvc.InitCommand()
+	dvc.StatusCommand()
 }
