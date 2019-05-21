@@ -98,10 +98,7 @@ func (d *DVC) getUntrackFiles() []string {
 
 	untrackedFiles := []string{}
 	trackedFiles := d.getTrackedFiles()
-
-	if len(trackedFiles) == 0 {
-		return untrackedFiles
-	}
+	stagedFiles := d.getStagedFiles()
 
 	currentDirFiles, err := file_io.GetFilesFrom(".")
 
@@ -109,8 +106,13 @@ func (d *DVC) getUntrackFiles() []string {
 		log.Fatalln("Error getting files from current dir!!")
 	}
 
+	if len(trackedFiles) == 0 && len(stagedFiles) == 0 {
+		return currentDirFiles
+	}
+
 	for _, currentFile := range currentDirFiles {
-		if !util.StringContains(trackedFiles, currentFile) {
+		if !util.StringContains(trackedFiles, currentFile) &&
+			!util.StringContains(stagedFiles, currentFile) {
 			untrackedFiles = append(untrackedFiles, currentFile)
 		}
 
@@ -143,35 +145,61 @@ func (d *DVC) getDotFileData() map[string]string {
 
 }
 
-func (d *DVC) StatusCommand() {
-	d.initCheck()
+func (d *DVC) showUntrackedFiles() {
 	untrackedFiles := d.getUntrackFiles()
 
 	if len(untrackedFiles) == 0 {
 		fmt.Println("There no untracked files.")
+		return
 	}
 
 	log.Println("Listing all the untracked files.")
 	for _, untrackedFile := range untrackedFiles {
 		color.Red(untrackedFile)
 	}
+
+}
+
+func (d *DVC) showStagedFiles() {
+	stagedFiles := d.getStagedFiles()
+
+	if len(stagedFiles) == 0 {
+		fmt.Println("There no staged files.")
+		return
+	}
+
+	log.Println("Listing all the staged files.")
+	for _, stagedFile := range stagedFiles {
+		color.Green(stagedFile)
+	}
+
+}
+
+func (d *DVC) StatusCommand() {
+	d.initCheck()
+	d.showUntrackedFiles()
+	d.showStagedFiles()
+
 }
 
 func (d *DVC) AddCommand(commandOptions []string) {
 	d.initCheck()
 	stagedFiles := []string{}
 	untrackedFiles := d.getUntrackFiles()
+	log.Println("Total untracked files : ", len(untrackedFiles))
 
 	if commandOptions[1] == "." {
 		stagedFiles = untrackedFiles
+		untrackedFiles = []string{}
 	} else {
 
-		for _, fileName := range commandOptions[1:] {
+		for index, fileName := range commandOptions[1:] {
 			if !util.StringContains(untrackedFiles, fileName) {
 				log.Printf("%s is not in the untracked list", fileName)
 				continue
 			}
 			stagedFiles = append(stagedFiles, fileName)
+			untrackedFiles = append(untrackedFiles[:index], untrackedFiles[index+1:]...)
 		}
 
 	}
@@ -192,4 +220,17 @@ func (d *DVC) getTrackedFiles() []string {
 	}
 
 	return trackedFiles
+}
+
+func (d *DVC) getStagedFiles() []string {
+
+	data, err := file_io.ReadLines(d.stagedFileName)
+
+	if err != nil {
+		log.Println("Error getting the staged files.")
+		log.Println(err)
+		return []string{}
+	}
+
+	return data
 }

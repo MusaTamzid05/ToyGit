@@ -10,4 +10,5 @@ func main() {
 	dvc.InitCommand()
 	//dvc.StatusCommand()
 	dvc.AddCommand([]string{"add", "."})
+	dvc.StatusCommand()
 }
