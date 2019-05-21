@@ -14,14 +14,15 @@ import (
 )
 
 type DVC struct {
-	dotPath     string
-	dotFileName string
-	hashes      []string
+	dotPath        string
+	dotFileName    string
+	stagedFileName string
+	hashes         []string
 }
 
 func New() *DVC {
 
-	dvc := DVC{dotFileName: "toy_git.txt"}
+	dvc := DVC{dotFileName: "toy_git.txt", stagedFileName: ".staged.txt"}
 	dvc.init()
 	return &dvc
 }
@@ -73,8 +74,15 @@ func (d *DVC) GetCurrentDirHashes() map[string]string {
 func (d *DVC) InitCommand() {
 
 	if !file_io.Exists(d.dotPath) {
-		file_io.CreateFile(d.dotPath)
+		_, err := file_io.CreateFile(d.dotPath)
+
+		if err != nil {
+			log.Println("Error initializing toy_git")
+			log.Fatalln(err)
+		}
 	}
+
+	log.Println("toy_git already Initiaized")
 
 }
 
@@ -150,6 +158,7 @@ func (d *DVC) StatusCommand() {
 }
 
 func (d *DVC) AddCommand(commandOptions []string) {
+	d.initCheck()
 	stagedFiles := []string{}
 	untrackedFiles := d.getUntrackFiles()
 
@@ -166,6 +175,8 @@ func (d *DVC) AddCommand(commandOptions []string) {
 		}
 
 	}
+
+	file_io.WriteLinesTo(d.stagedFileName, stagedFiles)
 	color.Green("Total file added : %d", len(stagedFiles))
 
 }

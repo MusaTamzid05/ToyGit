@@ -3,6 +3,7 @@ package file_io
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 )
@@ -38,16 +39,16 @@ func Exists(path string) bool {
 	return false
 }
 
-func CreateFile(path string) error {
+func CreateFile(path string) (*os.File, error) {
 	fmt.Println("Creating ", path)
 
-	_, err := os.Create(path)
+	fPtr, err := os.Create(path)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return fPtr, nil
 
 }
 
@@ -76,4 +77,19 @@ func GetFilesFrom(path string) ([]string, error) {
 
 	return files, nil
 
+}
+
+func WriteLinesTo(path string, lines []string) {
+
+	fPtr, err := CreateFile(path)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	defer fPtr.Close()
+
+	for _, line := range lines {
+		fmt.Fprintln(fPtr, line)
+	}
 }
