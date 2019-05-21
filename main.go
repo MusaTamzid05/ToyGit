@@ -8,5 +8,6 @@ func main() {
 
 	dvc := dvc.New()
 	dvc.InitCommand()
-	dvc.StatusCommand()
+	//dvc.StatusCommand()
+	dvc.AddCommand([]string{"add", "test22.txt", "util.go"})
 }

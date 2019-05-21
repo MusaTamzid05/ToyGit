@@ -143,10 +143,31 @@ func (d *DVC) StatusCommand() {
 		fmt.Println("There no untracked files.")
 	}
 
-	fmt.Println("Listing all the untracked files.")
+	log.Println("Listing all the untracked files.")
 	for _, untrackedFile := range untrackedFiles {
 		color.Red(untrackedFile)
 	}
+}
+
+func (d *DVC) AddCommand(commandOptions []string) {
+	stagedFiles := []string{}
+	untrackedFiles := d.getUntrackFiles()
+
+	if commandOptions[1] == "." {
+		stagedFiles = untrackedFiles
+	} else {
+
+		for _, fileName := range commandOptions[1:] {
+			if !util.StringContains(untrackedFiles, fileName) {
+				log.Printf("%s is not in the untracked list", fileName)
+				continue
+			}
+			stagedFiles = append(stagedFiles, fileName)
+		}
+
+	}
+	color.Green("Total file added : %d", len(stagedFiles))
+
 }
 
 func (d *DVC) getTrackedFiles() []string {
