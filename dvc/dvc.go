@@ -182,26 +182,31 @@ func (d *DVC) StatusCommand() {
 
 }
 
+func (d *DVC) addStagedFiles(filesToStage []string, stagedFiles []string, untrackedFiles []string) []string {
+
+	for _, fileName := range filesToStage {
+		if !util.StringContains(untrackedFiles, fileName) {
+			log.Printf("%s is not in the untracked list", fileName)
+			continue
+		}
+		stagedFiles = append(stagedFiles, fileName)
+	}
+
+	return stagedFiles
+
+}
+
 func (d *DVC) AddCommand(commandOptions []string) {
 	d.initCheck()
-	stagedFiles := []string{}
+	stagedFiles := d.getStagedFiles()
 	untrackedFiles := d.getUntrackFiles()
 	log.Println("Total untracked files : ", len(untrackedFiles))
+	log.Println("Total staged files : ", len(stagedFiles))
 
 	if commandOptions[1] == "." {
-		stagedFiles = untrackedFiles
-		untrackedFiles = []string{}
+		stagedFiles = append(stagedFiles, untrackedFiles...)
 	} else {
-
-		for index, fileName := range commandOptions[1:] {
-			if !util.StringContains(untrackedFiles, fileName) {
-				log.Printf("%s is not in the untracked list", fileName)
-				continue
-			}
-			stagedFiles = append(stagedFiles, fileName)
-			untrackedFiles = append(untrackedFiles[:index], untrackedFiles[index+1:]...)
-		}
-
+		stagedFiles = d.addStagedFiles(commandOptions[1:], stagedFiles, untrackedFiles)
 	}
 
 	file_io.WriteLinesTo(d.stagedFileName, stagedFiles)

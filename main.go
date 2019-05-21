@@ -8,7 +8,6 @@ func main() {
 
 	dvc := dvc.New()
 	dvc.InitCommand()
-	//dvc.StatusCommand()
-	dvc.AddCommand([]string{"add", "."})
+	dvc.AddCommand([]string{"add", "dvc.go"})
 	dvc.StatusCommand()
 }
